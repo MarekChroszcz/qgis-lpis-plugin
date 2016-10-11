@@ -14,10 +14,10 @@ version=1.0
 author=Sebastian Schulz / GIS Support
 email=sebastian.schulz@gis-support.pl
 
-about=
+about=Wtyczka do wyszukiwania działek z Systemu Identyfikacji Działek Rolnych LPIS (źródło: Geoportal.gov.pl, dostęp: 01.10.2016)
 
-tracker=
-repository=
+tracker=https://github.com/gis-support/qgis-lpis-plugin/issues
+repository=https://github.com/gis-support/qgis-lpis-plugin
 # End of mandatory metadata
 
 # Recommended items:
@@ -28,7 +28,7 @@ repository=
 # Tags are comma separated with spaces allowed
 tags=
 
-homepage=
+homepage=http://gis-support.pl/wtyczka-wyszukiwarka-lpis/
 category=Plugins
 icon=icon.png
 # experimental flag
