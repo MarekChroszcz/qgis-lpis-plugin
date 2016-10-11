@@ -192,10 +192,12 @@ class SearchLPIS:
                     'Wyszukiwarka LPIS',
                     u'Podaj numer działki',
                     level=QgsMessageBar.WARNING)
+                self.run()
             elif not self.searchLPISModule.keyLineEdit.text():
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Podaj klucz GIS Support',
                     level=QgsMessageBar.WARNING)
+                self.run()
             else:
                 self.searchLPISModule.findPlot()

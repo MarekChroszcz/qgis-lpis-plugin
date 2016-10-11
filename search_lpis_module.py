@@ -21,7 +21,7 @@
  ***************************************************************************/
 """
 from PyQt4 import uic
-from PyQt4.QtCore import QSettings, QVariant
+from PyQt4.QtCore import QSettings, QVariant, Qt
 from PyQt4.QtGui import QMessageBox, QWidget, QDialog
 import os.path
 import locale
@@ -54,30 +54,56 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                                      'r'))
         self.w = sorted(self.data.keys(), cmp=locale.strcoll)
         self.wComboBox.addItems(self.w)
+        index = self.wComboBox.findText(
+            QSettings().value('gissupport/search_lpis/w'),
+            Qt.MatchFixedString)
+        if index >= 0:
+            self.wComboBox.setCurrentIndex(index)
         self.p = sorted(self.data
                         [self.wComboBox.currentText()].keys(),
                         cmp=locale.strcoll)
         self.pComboBox.addItems(self.p)
+        index = self.pComboBox.findText(
+            QSettings().value('gissupport/search_lpis/p'),
+            Qt.MatchFixedString)
+        if index >= 0:
+            self.pComboBox.setCurrentIndex(index)
         self.g = sorted(self.data
                         [self.wComboBox.currentText()]
                         [self.pComboBox.currentText()],
                         cmp=locale.strcoll)
         self.gComboBox.addItems(self.g)
+        index = self.gComboBox.findText(
+            QSettings().value('gissupport/search_lpis/g'),
+            Qt.MatchFixedString)
+        if index >= 0:
+            self.gComboBox.setCurrentIndex(index)
         self.o = sorted(self.data
                         [self.wComboBox.currentText()]
                         [self.pComboBox.currentText()]
                         [self.gComboBox.currentText()],
                         cmp=locale.strcoll)
         self.oComboBox.addItems(self.o)
+        index = self.oComboBox.findText(
+            QSettings().value('gissupport/search_lpis/o'),
+            Qt.MatchFixedString)
+        if index >= 0:
+            self.oComboBox.setCurrentIndex(index)
         self.wComboBox.currentIndexChanged.connect(self.updateP)
         self.pComboBox.currentIndexChanged.connect(self.updateG)
         self.gComboBox.currentIndexChanged.connect(self.updateO)
+        self.oComboBox.currentIndexChanged.connect(self.saveO)
         self.keyLineEdit.setText(QSettings().value('gissupport/api/key'))
         self.saveKeyButton.clicked.connect(self.saveKey)
         self.addWMSButton.clicked.connect(self.addWMS)
 
     def saveKey(self):
-        QSettings().setValue('gissupport/api/key', self.keyLineEdit.text())
+        QSettings().setValue('gissupport/api/key',
+                             self.keyLineEdit.text())
+
+    def saveO(self):
+        QSettings().setValue('gissupport/search_lpis/o',
+                             self.oComboBox.currentText())
 
     def addWMS(self):
         if not QgsMapLayerRegistry.instance().mapLayersByName(
@@ -114,6 +140,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                     'Wyszukiwarka LPIS',
                     u'Nieprawidłowy klucz GIS Support',
                     level=QgsMessageBar.CRITICAL)
+                self.parent.run()
                 return
             data = json.loads(r.read())['data']
         except:
@@ -124,11 +151,13 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z bazą',
                     level=QgsMessageBar.CRITICAL)
+                self.parent.run()
             elif data == 'app connection problem':
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z aplikacją',
                     level=QgsMessageBar.CRITICAL)
+                self.parent.run()
             else:
                 if not QgsMapLayerRegistry.instance().mapLayersByName(
                         'Wyszukiwarka LPIS'):
@@ -187,6 +216,8 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                         [self.wComboBox.currentText()].keys(),
                         cmp=locale.strcoll)
         self.pComboBox.addItems(self.p)
+        QSettings().setValue('gissupport/search_lpis/w',
+                             self.wComboBox.currentText())
 
     def updateG(self):
         self.gComboBox.clear()
@@ -196,6 +227,8 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                             [self.pComboBox.currentText()],
                             cmp=locale.strcoll)
             self.gComboBox.addItems(self.g)
+            QSettings().setValue('gissupport/search_lpis/p',
+                                 self.pComboBox.currentText())
 
     def updateO(self):
         self.oComboBox.clear()
@@ -205,3 +238,5 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                             [self.pComboBox.currentText()]
                             [self.gComboBox.currentText()])
             self.oComboBox.addItems(self.o)
+            QSettings().setValue('gissupport/search_lpis/g',
+                                 self.gComboBox.currentText())
