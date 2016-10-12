@@ -164,7 +164,7 @@ class SearchLPIS:
         self.add_action(
             icon_path,
             text=self.tr(u'Wyszukiwarka LPIS'),
-            callback=self.run,
+            callback=self.searchLPISModule.show,
             parent=self.iface.mainWindow())
 
     def unload(self):
@@ -176,28 +176,3 @@ class SearchLPIS:
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
-
-    def run(self):
-        """Run method that performs all the real work"""
-        # show the dialog
-        self.searchLPISModule.show()
-        # Run the dialog event loop
-        result = self.searchLPISModule.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            if not self.searchLPISModule.nLineEdit.text():
-                self.iface.messageBar().pushMessage(
-                    'Wyszukiwarka LPIS',
-                    u'Podaj numer działki',
-                    level=QgsMessageBar.WARNING)
-                self.run()
-            elif not self.searchLPISModule.keyLineEdit.text():
-                self.iface.messageBar().pushMessage(
-                    'Wyszukiwarka LPIS',
-                    u'Podaj klucz GIS Support',
-                    level=QgsMessageBar.WARNING)
-                self.run()
-            else:
-                self.searchLPISModule.findPlot()

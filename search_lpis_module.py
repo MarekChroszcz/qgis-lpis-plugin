@@ -33,6 +33,7 @@ from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer, \
     QgsMapLayerRegistry, QgsRasterLayer, QgsField, QgsCoordinateTransform
 from qgis.gui import QgsMessageBar
 
+locale.setlocale(locale.LC_ALL, '')
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'search_lpis_module.ui'))
 
@@ -140,8 +141,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                     'Wyszukiwarka LPIS',
                     u'Nieprawidłowy klucz GIS Support',
                     level=QgsMessageBar.CRITICAL)
-                self.parent.run()
-                return
+                return False
             data = json.loads(r.read())['data']
         except:
             data = 'app connection problem'
@@ -151,13 +151,13 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z bazą',
                     level=QgsMessageBar.CRITICAL)
-                self.parent.run()
+                return False
             elif data == 'app connection problem':
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z aplikacją',
                     level=QgsMessageBar.CRITICAL)
-                self.parent.run()
+                return False
             else:
                 if not QgsMapLayerRegistry.instance().mapLayersByName(
                         'Wyszukiwarka LPIS'):
@@ -204,11 +204,13 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                         'Wyszukiwarka LPIS',
                         u'Istnieje więcej działek o podanym numerze',
                         level=QgsMessageBar.INFO)
+                return True
         else:
             self.iface.messageBar().pushMessage(
                 'Wyszukiwarka LPIS',
                 u'Nie znaleziono działki',
                 level=QgsMessageBar.WARNING)
+            return False
 
     def updateP(self):
         self.pComboBox.clear()
@@ -240,3 +242,17 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             self.oComboBox.addItems(self.o)
             QSettings().setValue('gissupport/search_lpis/g',
                                  self.gComboBox.currentText())
+
+    def accept(self):
+        if not self.nLineEdit.text():
+            self.iface.messageBar().pushMessage(
+                'Wyszukiwarka LPIS',
+                u'Podaj numer działki',
+                level=QgsMessageBar.WARNING)
+        elif not self.keyLineEdit.text():
+            self.iface.messageBar().pushMessage(
+                'Wyszukiwarka LPIS',
+                u'Podaj klucz GIS Support',
+                level=QgsMessageBar.WARNING)
+        elif self.findPlot():
+            super(SearchLPISModule, self).accept()
