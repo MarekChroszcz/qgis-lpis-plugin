@@ -97,6 +97,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.keyLineEdit.setText(QSettings().value('gissupport/api/key'))
         self.saveKeyButton.clicked.connect(self.saveKey)
         self.addWMSButton.clicked.connect(self.addWMS)
+        self.nLineEdit.setFocus()
 
     def saveKey(self):
         QSettings().setValue('gissupport/api/key',
