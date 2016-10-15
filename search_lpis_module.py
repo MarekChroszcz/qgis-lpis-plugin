@@ -136,7 +136,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         data = ''
         try:
             params = urllib.urlencode(params)
-            r = urllib.urlopen('http://qgisapi.apps.divi.pl/lpis?' + params)
+            r = urllib.urlopen('http://api.gis-support.pl/lpis?' + params)
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',

@@ -20,7 +20,7 @@
    <item>
     <widget class="QLabel" name="label_6">
      <property name="text">
-      <string>Klucz GIS Support</string>
+      <string>Klucz GIS Support:</string>
      </property>
     </widget>
    </item>
