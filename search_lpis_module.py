@@ -94,6 +94,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.pComboBox.currentIndexChanged.connect(self.updateG)
         self.gComboBox.currentIndexChanged.connect(self.updateO)
         self.oComboBox.currentIndexChanged.connect(self.saveO)
+        self.skipO.stateChanged.connect(self.toggleO)
         self.keyLineEdit.setText(QSettings().value('gissupport/api/key'))
         self.saveKeyButton.clicked.connect(self.saveKey)
         self.addWMSButton.clicked.connect(self.addWMS)
@@ -106,6 +107,12 @@ class SearchLPISModule(QDialog, FORM_CLASS):
     def saveO(self):
         QSettings().setValue('gissupport/search_lpis/o',
                              self.oComboBox.currentText())
+
+    def toggleO(self):
+        if self.skipO.isChecked():
+            self.oComboBox.setEnabled(False)
+        else:
+            self.oComboBox.setEnabled(True)
 
     def addWMS(self):
         if not QgsMapLayerRegistry.instance().mapLayersByName(
@@ -129,10 +136,11 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             'w': self.wComboBox.currentText().encode('utf-8'),
             'p': self.pComboBox.currentText().encode('utf-8'),
             'g': self.gComboBox.currentText().encode('utf-8'),
-            'o': self.oComboBox.currentText().encode('utf-8'),
             'n': self.nLineEdit.text().encode('utf-8'),
             'key': self.keyLineEdit.text().encode('utf-8').strip()
         }
+        if not self.skipO.isChecked():
+            params['o'] = self.oComboBox.currentText().encode('utf-8')
         data = ''
         try:
             params = urllib.urlencode(params)

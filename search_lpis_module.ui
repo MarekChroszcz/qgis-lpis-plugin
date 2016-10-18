@@ -106,6 +106,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="skipO">
+     <property name="text">
+      <string>Nie znam obrębu</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="label_5">
      <property name="text">
       <string>Numer działki:</string>
