@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/SearchLPIS" >
-        <file>icon.png</file>
+        <file>search.png</file>
+        <file>identify.png</file>
     </qresource>
 </RCC>

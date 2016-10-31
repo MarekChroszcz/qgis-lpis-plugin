@@ -27,6 +27,7 @@ from qgis.gui import QgsMessageBar
 import resources
 # Import the code for the dialog
 from search_lpis_module import SearchLPISModule
+from identify_lpis_module import IdentifyLPISModule
 import os.path
 
 
@@ -61,6 +62,7 @@ class SearchLPIS:
 
         # Create the dialog (after translation) and keep reference
         self.searchLPISModule = SearchLPISModule(self)
+        self.identifyLPISModule = IdentifyLPISModule(self)
 
         # Declare instance attributes
         self.actions = []
@@ -90,6 +92,7 @@ class SearchLPIS:
         text,
         callback,
         enabled_flag=True,
+        checkable=False,
         add_to_menu=True,
         add_to_toolbar=True,
         status_tip=None,
@@ -139,6 +142,7 @@ class SearchLPIS:
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
+        action.setCheckable(checkable)
 
         if status_tip is not None:
             action.setStatusTip(status_tip)
@@ -162,10 +166,16 @@ class SearchLPIS:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
         icon_path = ':/plugins/SearchLPIS/icon.png'
         self.add_action(
-            icon_path,
+            ':/plugins/SearchLPIS/search.png',
             text=self.tr(u'Wyszukiwarka LPIS'),
             callback=self.searchLPISModule.show,
             parent=self.iface.mainWindow())
+        self.add_action(
+            ':/plugins/SearchLPIS/identify.png',
+            text=self.tr(u'Identyfikacja LPIS'),
+            callback=self.searchLPISModule.show,
+            parent=self.iface.mainWindow(),
+            checkable=True)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

@@ -30,7 +30,7 @@ tags=
 
 homepage=http://gis-support.pl/wtyczka-wyszukiwarka-lpis/
 category=Plugins
-icon=icon.png
+icon=search.png
 # experimental flag
 experimental=False
 

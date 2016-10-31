@@ -48,7 +48,7 @@ PY_FILES = \
 
 UI_FILES = search_lpis_dialog_base.ui
 
-EXTRAS = metadata.txt icon.png
+EXTRAS = metadata.txt search.png identify.png
 
 COMPILED_RESOURCE_FILES = resources.py
 
