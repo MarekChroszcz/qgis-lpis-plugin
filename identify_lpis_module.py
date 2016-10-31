@@ -68,7 +68,7 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
         if not data:
             self.iface.messageBar().pushMessage(
                 u'Identyfikacja LPIS',
-                u'Warstwa nie przecina żadnej działki',
+                u'Nie istnieją działki o podanych współrzędnych',
                 level=QgsMessageBar.WARNING)
         elif data == 'db connection problem':
             self.iface.messageBar().pushMessage(
@@ -82,7 +82,6 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
                 level=QgsMessageBar.CRITICAL)
         else:
             self.createOutputLayer(resp)
-            self.canvas.refresh()
 
     def createOutputLayer(self, resp):
         if not QgsMapLayerRegistry.instance().mapLayersByName(
@@ -116,16 +115,11 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
             pr = vl.dataProvider()
             pr.addFeatures([feature])
         vl.updateExtents()
-        if resp['status'] == 'limited':
-            self.iface.messageBar().pushMessage(
+        vl.triggerRepaint()
+        self.canvas.refresh()
+        self.iface.messageBar().pushMessage(
                 'Identyfikacja LPIS',
-                u'Wynik został ograniczony do %d działek \
-                ze względu na ograniczenia serwera' % len(resp['data']),
-                level=QgsMessageBar.WARNING)
-        else:
-            self.iface.messageBar().pushMessage(
-                'Identyfikacja LPIS',
-                u'Liczba dodanych działek: %d' % len(resp['data']),
+                u'Dodano działkę',
                 level=QgsMessageBar.INFO)
 
     def toggleMapTool(self, state):
