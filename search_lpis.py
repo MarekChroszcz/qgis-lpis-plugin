@@ -170,10 +170,10 @@ class SearchLPIS:
             text=self.tr(u'Wyszukiwarka LPIS'),
             callback=self.searchLPISModule.show,
             parent=self.iface.mainWindow())
-        self.add_action(
+        self.identifyTool = self.add_action(
             ':/plugins/SearchLPIS/identify.png',
             text=self.tr(u'Identyfikacja LPIS'),
-            callback=self.identifyLPISModule.run,
+            callback=self.identifyLPISModule.toggleMapTool,
             parent=self.iface.mainWindow(),
             checkable=True)
 

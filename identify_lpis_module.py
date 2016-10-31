@@ -21,21 +21,27 @@ IdentifyLPIS
  ***************************************************************************/
 """
 from PyQt4.QtCore import Qt, pyqtSignal
-from qgis.core import QgsFeature
-from qgis.gui import QgsMapTool
+from qgis.gui import QgsMapToolEmitPoint
 
-class IdentifyLPISModule(QgsMapTool):
+
+class IdentifyLPISModule(QgsMapToolEmitPoint):
     def __init__(self, parent):
         self.parent = parent
         self.iface = parent.iface
         self.canvas = parent.canvas
-        super(QgsMapTool, self).__init__(self.canvas)
+        super(QgsMapToolEmitPoint, self).__init__(self.canvas)
+        self.canvasClicked.connect(self.findPlot)
+        self.deactivated.connect(self.deactivate)
 
-    def canvasReleaseEvent(self, event):
-        x = event.pos().x()
-        y = event.pos().y()
-        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-        print x, y
+    def deactivate(self):
+        self.parent.identifyTool.setChecked(False)
+        super(IdentifyLPISModule, self).deactivate()
 
-    def run(self):
-        self.canvas.setMapTool(self)
+    def findPlot(self, coords):
+        print coords
+
+    def toggleMapTool(self, state):
+        if state:
+            self.canvas.setMapTool(self)
+        else:
+            self.canvas.unsetMapTool(self)
