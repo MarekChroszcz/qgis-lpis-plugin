@@ -44,6 +44,7 @@ class SearchLPIS:
         """
         # Save reference to the QGIS interface
         self.iface = iface
+        self.canvas = self.iface.mapCanvas()
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
@@ -164,7 +165,6 @@ class SearchLPIS:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = ':/plugins/SearchLPIS/icon.png'
         self.add_action(
             ':/plugins/SearchLPIS/search.png',
             text=self.tr(u'Wyszukiwarka LPIS'),
@@ -173,7 +173,7 @@ class SearchLPIS:
         self.add_action(
             ':/plugins/SearchLPIS/identify.png',
             text=self.tr(u'Identyfikacja LPIS'),
-            callback=self.searchLPISModule.show,
+            callback=self.identifyLPISModule.run,
             parent=self.iface.mainWindow(),
             checkable=True)
 

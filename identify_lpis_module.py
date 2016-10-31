@@ -22,11 +22,20 @@ IdentifyLPIS
 """
 from PyQt4.QtCore import Qt, pyqtSignal
 from qgis.core import QgsFeature
-from qgis.gui import QgsMapToolIdentify
+from qgis.gui import QgsMapTool
 
-class IdentifyLPISModule(QgsMapToolIdentify):
-    def __init__(self, parent, parents=None):
-        super(IdentifyLPISModule, self).__init__(parents)
+class IdentifyLPISModule(QgsMapTool):
+    def __init__(self, parent):
         self.parent = parent
         self.iface = parent.iface
-        print 'identify init'
+        self.canvas = parent.canvas
+        super(QgsMapTool, self).__init__(self.canvas)
+
+    def canvasReleaseEvent(self, event):
+        x = event.pos().x()
+        y = event.pos().y()
+        point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
+        print x, y
+
+    def run(self):
+        self.canvas.setMapTool(self)
