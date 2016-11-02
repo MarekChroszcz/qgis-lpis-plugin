@@ -9,14 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>450</height>
+    <width>370</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Wyszukiwarka LPIS</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Co to jest &lt;a href=&quot;http://gis-support.pl/co-to-jest-lpis/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;LPIS?&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QLabel" name="label_6">
      <property name="text">
@@ -106,11 +113,25 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="skipO">
-     <property name="text">
-      <string>Nie znam obrębu</string>
-     </property>
-    </widget>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="skipO">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>Nie znam obrębu (jeśli zaznaczone to wyszukiwane będą działki o podanym numerze na terenie całej gminy)</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLabel" name="label_5">

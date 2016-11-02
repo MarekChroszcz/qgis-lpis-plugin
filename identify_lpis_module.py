@@ -61,6 +61,7 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
                     u'Identyfikacja LPIS',
                     u'Nieprawidłowy klucz GIS Support',
                     level=QgsMessageBar.CRITICAL)
+                return
             resp = json.loads(r.read())
             data = resp['data']
         except:
