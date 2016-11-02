@@ -37,9 +37,9 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
         self.canvas = parent.canvas
         super(QgsMapToolEmitPoint, self).__init__(self.canvas)
         self.canvasClicked.connect(self.findPlot)
-        self.deactivated.connect(self.deactivate)
+        self.deactivated.connect(self.closeOnChangeTool)
 
-    def deactivate(self):
+    def closeOnChangeTool(self):
         self.parent.identifyTool.setChecked(False)
 
     def findPlot(self, point):
@@ -55,7 +55,7 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
         data = ''
         try:
             params = urllib.urlencode(params)
-            r = urllib.urlopen('http://localhost:5000/identify?' + params)
+            r = urllib.urlopen('http://api.gis-support.pl/identify?' + params)
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     u'Identyfikacja LPIS',
@@ -119,7 +119,7 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
         self.canvas.refresh()
         self.iface.messageBar().pushMessage(
                 'Identyfikacja LPIS',
-                u'Dodano działkę',
+                u'Znaleziono działkę',
                 level=QgsMessageBar.INFO)
 
     def toggleMapTool(self, state):
