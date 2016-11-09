@@ -27,7 +27,6 @@ from qgis.core import QgsGeometry, QgsPoint, QgsCoordinateTransform, \
     QgsField, QgsFeature
 import urllib
 import json
-import processing
 
 
 class IdentifyLPISModule(QgsMapToolEmitPoint):
@@ -108,12 +107,13 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
                  QgsField("shape_area", QVariant.String)])
             vl.commitChanges()
             QgsMapLayerRegistry.instance().addMapLayer(vl)
+        vl = QgsMapLayerRegistry.instance().mapLayersByName(
+            'Identyfikacja LPIS')[0]
+        pr = vl.dataProvider()
         for wkt in resp['data']:
             feature = QgsFeature()
             feature.setGeometry(QgsGeometry.fromWkt(wkt[0]))
             feature.setAttributes([a for a in wkt[1:]])
-            vl = processing.getObject('Identyfikacja LPIS')
-            pr = vl.dataProvider()
             pr.addFeatures([feature])
         vl.updateExtents()
         vl.triggerRepaint()

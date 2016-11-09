@@ -28,7 +28,6 @@ import locale
 import pickle
 import urllib
 import json
-import processing
 from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer, \
     QgsMapLayerRegistry, QgsRasterLayer, QgsField, QgsCoordinateTransform
 from qgis.gui import QgsMessageBar
@@ -191,12 +190,13 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                          QgsField("shape_area", QVariant.String)])
                     vl.commitChanges()
                     QgsMapLayerRegistry.instance().addMapLayer(vl)
+                vl = QgsMapLayerRegistry.instance().mapLayersByName(
+                    'Wyszukiwarka LPIS')[0]
+                pr = vl.dataProvider()
                 for wkt in data:
                     feature = QgsFeature()
                     feature.setGeometry(QgsGeometry.fromWkt(wkt[0]))
                     feature.setAttributes([a for a in wkt[1:]])
-                    vl = processing.getObject('Wyszukiwarka LPIS')
-                    pr = vl.dataProvider()
                     pr.addFeatures([feature])
                 vl.updateExtents()
                 self.iface.mapCanvas().setExtent(
