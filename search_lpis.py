@@ -28,6 +28,7 @@ import resources
 # Import the code for the dialog
 from search_lpis_module import SearchLPISModule
 from identify_lpis_module import IdentifyLPISModule
+from intersect_lpis_module import IntersectLPISModule
 import os.path
 
 
@@ -64,6 +65,7 @@ class SearchLPIS:
         # Create the dialog (after translation) and keep reference
         self.searchLPISModule = SearchLPISModule(self)
         self.identifyLPISModule = IdentifyLPISModule(self)
+        self.intersectLPISModule = IntersectLPISModule(self)
 
         # Declare instance attributes
         self.actions = []
@@ -176,6 +178,11 @@ class SearchLPIS:
             callback=self.identifyLPISModule.toggleMapTool,
             parent=self.iface.mainWindow(),
             checkable=True)
+        self.add_action(
+           ':/plugins/SearchLPIS/intersect.png',
+           text=u'Przecięcia LPIS',
+           callback=self.intersectLPISModule.show,
+           parent=self.iface.mainWindow())
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

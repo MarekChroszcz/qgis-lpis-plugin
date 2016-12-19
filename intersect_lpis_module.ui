@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SearchLPISDialogBase</class>
- <widget class="QDialog" name="SearchLPISDialogBase">
+ <class>IntersectLPISDialogBase</class>
+ <widget class="QDialog" name="IntersectLPISDialogBase">
   <property name="enabled">
    <bool>true</bool>
   </property>
@@ -10,15 +10,15 @@
     <x>0</x>
     <y>0</y>
     <width>370</width>
-    <height>510</height>
+    <height>264</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Wyszukiwarka LPIS</string>
+   <string>Przecięcia LPIS</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label_7">
+    <widget class="QLabel" name="label_3">
      <property name="text">
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Co to jest &lt;a href=&quot;http://gis-support.pl/co-to-jest-lpis/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;LPIS?&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
@@ -43,7 +43,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="linkLabel">
+      <widget class="QLabel" name="label_2">
        <property name="text">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nie masz &lt;a href=&quot;http://gis-support.pl/klucze-gis-support/&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;klucza?&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -77,77 +77,23 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Województwo:</string>
+      <string>Wybierz warstwę do przecięcia:</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QComboBox" name="wComboBox"/>
+    <widget class="QgsMapLayerComboBox" name="layerComboBox">
+     <property name="filters">
+      <set>QgsMapLayerProxyModel::HasGeometry|QgsMapLayerProxyModel::LineLayer|QgsMapLayerProxyModel::NoGeometry|QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::PointLayer|QgsMapLayerProxyModel::PolygonLayer|QgsMapLayerProxyModel::VectorLayer|QgsMapLayerProxyModel::WritableLayer</set>
+     </property>
+    </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_2">
+    <widget class="QCheckBox" name="selectCheckBox">
      <property name="text">
-      <string>Powiat:</string>
+      <string>Wybierz tylko zaznaczone</string>
      </property>
     </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="pComboBox"/>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>Gmina:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="gComboBox"/>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>Obręb:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="oComboBox">
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="skipO">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_8">
-       <property name="text">
-        <string>Nie znam obrębu (jeśli zaznaczone to wyszukiwane będą działki o podanym numerze na terenie całej gminy)</string>
-       </property>
-       <property name="wordWrap">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Numer działki:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="nLineEdit"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -169,12 +115,19 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SearchLPISDialogBase</receiver>
+   <receiver>IntersectLPISDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -190,7 +143,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SearchLPISDialogBase</receiver>
+   <receiver>IntersectLPISDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">

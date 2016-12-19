@@ -2,5 +2,6 @@
     <qresource prefix="/plugins/SearchLPIS" >
         <file>search.png</file>
         <file>identify.png</file>
+	<file>intersect.png</file>
     </qresource>
 </RCC>
