@@ -130,24 +130,21 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
 
     def findPlots(self):
         vl = self.layerComboBox.currentLayer()
-        geom = QgsGeometry.fromWkt('GEOMETRYCOLLECTION()')
         trans = QgsCoordinateTransform(vl.crs(),
                                        QgsCoordinateReferenceSystem(2180))
         if not self.selectCheckBox.isChecked():
-            for f in vl.getFeatures():
-                f.geometry().transform(trans)
-                geom = geom.combine(f.geometry())
-            if geom.isEmpty():
+            geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.getFeatures()])
+            geom.transform(trans)
+            if geom.isGeosEmpty():
                 self.iface.messageBar().pushMessage(
                     'Przeciecia LPIS',
                     u'Brak obiektów na warstwie',
                     level=QgsMessageBar.WARNING)
                 return False
         else:
-            for f in vl.selectedFeatures():
-                f.geometry().transform(trans)
-                geom = geom.combine(f.geometry())
-            if geom.isEmpty():
+            geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.selectedFeatures()]).transform(trans)
+            geom.transform(trans)
+            if geom.isGeosEmpty():
                 self.iface.messageBar().pushMessage(
                     'Przeciecia LPIS',
                     u'Brak zaznaczonych obiektów',
