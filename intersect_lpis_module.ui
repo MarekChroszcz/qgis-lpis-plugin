@@ -83,9 +83,6 @@
    </item>
    <item>
     <widget class="QgsMapLayerComboBox" name="layerComboBox">
-     <property name="filters">
-      <set>QgsMapLayerProxyModel::HasGeometry|QgsMapLayerProxyModel::LineLayer|QgsMapLayerProxyModel::NoGeometry|QgsMapLayerProxyModel::PluginLayer|QgsMapLayerProxyModel::PointLayer|QgsMapLayerProxyModel::PolygonLayer|QgsMapLayerProxyModel::VectorLayer|QgsMapLayerProxyModel::WritableLayer</set>
-     </property>
     </widget>
    </item>
    <item>
