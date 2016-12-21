@@ -16,7 +16,7 @@
   <property name="windowTitle">
    <string>Przecięcia LPIS</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="label_3">
      <property name="text">
@@ -75,15 +75,15 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Wybierz warstwę do przecięcia:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QgsMapLayerComboBox" name="layerComboBox">
-    </widget>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Wybierz warstwę do przecięcia:</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QCheckBox" name="selectCheckBox">
@@ -112,13 +112,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QgsMapLayerComboBox</class>
-   <extends>QComboBox</extends>
-   <header>qgsmaplayercombobox.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>

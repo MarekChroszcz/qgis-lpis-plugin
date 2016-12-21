@@ -46,6 +46,12 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
         # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
+        
+        self.layerComboBox = QgsMapLayerComboBox(self)
+        self.layerComboBox.setObjectName("layerComboBox")
+        self.verticalLayout.addWidget(self.layerComboBox)
+        self.verticalLayout_2.addLayout(self.verticalLayout)
+        
         self.parent = parent
         self.iface = parent.iface
         self.keyLineEdit.setText(QSettings().value('gissupport/api/key'))
@@ -142,7 +148,7 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                     level=QgsMessageBar.WARNING)
                 return False
         else:
-            geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.selectedFeatures()]).transform(trans)
+            geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.selectedFeatures()])
             geom.transform(trans)
             if geom.isGeosEmpty():
                 self.iface.messageBar().pushMessage(
