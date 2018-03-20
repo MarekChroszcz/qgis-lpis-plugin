@@ -142,8 +142,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             params['o'] = self.oComboBox.currentText().encode('utf-8')
         data = ''
         try:
-            params = urllib.urlencode(params)
-            r = urllib.urlopen('http://api.gis-support.pl/lpis?' + params)
+            r = urllib.urlopen('http://api.gis-support.pl/lpis?' + urllib.urlencode(params))
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
@@ -208,7 +207,16 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                         destinationCrs()).
                     transform(vl.extent()))
                 self.iface.mapCanvas().refresh()
-                if len(data) > 1:
+                notfound_parcels = []
+                for nr in params['n'].replace(" ","").split(','):
+                    if nr not in vl.uniqueValues(vl.fieldNameIndex('numer')):
+                        notfound_parcels.append(nr)
+                if notfound_parcels:
+                    self.iface.messageBar().pushMessage(
+                        'Wyszukiwarka LPIS',
+                        u"Nie znaleziono działek o numerze: {}".format(','.join(notfound_parcels)),
+                        level=QgsMessageBar.INFO)
+                if len(data) > 1 and ',' not in params['n']:
                     self.iface.messageBar().pushMessage(
                         'Wyszukiwarka LPIS',
                         u'Istnieje więcej działek o podanym numerze',
