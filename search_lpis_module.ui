@@ -140,11 +140,35 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Numer działki:</string>
-     </property>
-    </widget>
+    <layout class="QFormLayout" name="formLayout_2">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Numer działki:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_9">
+       <property name="maximumSize">
+        <size>
+         <width>15</width>
+         <height>15</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Można wskazać kilka działek jednocześnie 
+rozdzielając numery przecinkiem np. 1600,1601.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLineEdit" name="nLineEdit"/>

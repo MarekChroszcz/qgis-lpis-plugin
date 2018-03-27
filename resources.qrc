@@ -3,5 +3,6 @@
         <file>search.png</file>
         <file>identify.png</file>
 	<file>intersect.png</file>
+	<file>info.png</file>
     </qresource>
 </RCC>

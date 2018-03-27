@@ -22,7 +22,7 @@
 """
 from PyQt4 import uic
 from PyQt4.QtCore import QSettings, QVariant, Qt
-from PyQt4.QtGui import QMessageBox, QWidget, QDialog
+from PyQt4.QtGui import QMessageBox, QWidget, QDialog, QPixmap
 import os.path
 import locale
 import pickle
@@ -98,6 +98,8 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.saveKeyButton.clicked.connect(self.saveKey)
         self.addWMSButton.clicked.connect(self.addWMS)
         self.nLineEdit.setFocus()
+	    pixmap = QPixmap(':/plugins/SearchLPIS/info.png')
+	    self.label_9.setPixmap(pixmap)
 
     def saveKey(self):
         QSettings().setValue('gissupport/api/key',
