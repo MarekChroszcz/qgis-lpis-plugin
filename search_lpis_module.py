@@ -98,8 +98,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.saveKeyButton.clicked.connect(self.saveKey)
         self.addWMSButton.clicked.connect(self.addWMS)
         self.nLineEdit.setFocus()
-        pixmap = QPixmap(':/plugins/SearchLPIS/info.png')
-        self.label_9.setPixmap(pixmap)
+        self.label_9.setPixmap(QPixmap(':/plugins/SearchLPIS/info.png'))
 
     def saveKey(self):
         QSettings().setValue('gissupport/api/key',
