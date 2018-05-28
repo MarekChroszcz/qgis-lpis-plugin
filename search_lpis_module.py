@@ -20,17 +20,20 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4 import uic
-from PyQt4.QtCore import QSettings, QVariant, Qt
-from PyQt4.QtGui import QMessageBox, QWidget, QDialog, QPixmap
+from future import standard_library
+standard_library.install_aliases()
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QSettings, QVariant, Qt
+from qgis.PyQt.QtWidgets import QMessageBox, QWidget, QDialog
+from qgis.PyQt.QtGui import QPixmap
 import os.path
 import locale
 import pickle
-import urllib
+from functools import cmp_to_key
+import urllib.request, urllib.parse, urllib.error
 import json
 from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer, \
-    QgsMapLayerRegistry, QgsRasterLayer, QgsField, QgsCoordinateTransform
-from qgis.gui import QgsMessageBar
+    QgsProject, QgsRasterLayer, QgsField, QgsCoordinateTransform, Qgis
 
 locale.setlocale(locale.LC_ALL, '')
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -51,17 +54,18 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.iface = parent.iface
         self.data = pickle.load(open(os.path.dirname(__file__) +
                                      '/options.pkl',
-                                     'r'))
-        self.w = sorted(self.data.keys(), cmp=locale.strcoll)
+                                     'rb'))
+        #print(self.data)
+        self.w = sorted(list(self.data.keys()), key=cmp_to_key(locale.strcoll))
         self.wComboBox.addItems(self.w)
         index = self.wComboBox.findText(
             QSettings().value('gissupport/search_lpis/w'),
             Qt.MatchFixedString)
         if index >= 0:
             self.wComboBox.setCurrentIndex(index)
-        self.p = sorted(self.data
-                        [self.wComboBox.currentText()].keys(),
-                        cmp=locale.strcoll)
+        self.p = sorted(list(self.data
+                        [self.wComboBox.currentText()].keys()),
+                        key=cmp_to_key(locale.strcoll))
         self.pComboBox.addItems(self.p)
         index = self.pComboBox.findText(
             QSettings().value('gissupport/search_lpis/p'),
@@ -71,7 +75,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
         self.g = sorted(self.data
                         [self.wComboBox.currentText()]
                         [self.pComboBox.currentText()],
-                        cmp=locale.strcoll)
+                        key=cmp_to_key(locale.strcoll))
         self.gComboBox.addItems(self.g)
         index = self.gComboBox.findText(
             QSettings().value('gissupport/search_lpis/g'),
@@ -82,7 +86,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                         [self.wComboBox.currentText()]
                         [self.pComboBox.currentText()]
                         [self.gComboBox.currentText()],
-                        cmp=locale.strcoll)
+                        key=cmp_to_key(locale.strcoll))
         self.oComboBox.addItems(self.o)
         index = self.oComboBox.findText(
             QSettings().value('gissupport/search_lpis/o'),
@@ -115,7 +119,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             self.oComboBox.setEnabled(True)
 
     def addWMS(self):
-        if not QgsMapLayerRegistry.instance().mapLayersByName(
+        if not QgsProject.instance().mapLayersByName(
                 'Dzialki LPIS'):
             url = ("contextualWMSLegend=0&"
                    "crs=EPSG:2180&"
@@ -127,30 +131,30 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                    "url=http://mapy.geoportal.gov.pl"
                    "/wss/service/pub/guest/G2_GO_WMS/MapServer/WMSServer")
             layer = QgsRasterLayer(url, 'Dzialki LPIS', 'wms')
-            QgsMapLayerRegistry.instance().addMapLayer(layer)
+            QgsProject.instance().addMapLayer(layer)
         else:
             pass
 
     def findPlot(self):
         params = {
-            'w': self.wComboBox.currentText().encode('utf-8'),
-            'p': self.pComboBox.currentText().encode('utf-8'),
-            'g': self.gComboBox.currentText().encode('utf-8'),
-            'n': self.nLineEdit.text().encode('utf-8'),
-            'key': self.keyLineEdit.text().encode('utf-8').strip()
+            'w': self.wComboBox.currentText(),
+            'p': self.pComboBox.currentText(),
+            'g': self.gComboBox.currentText(),
+            'n': self.nLineEdit.text(),
+            'key': self.keyLineEdit.text().strip()
         }
         if not self.skipO.isChecked():
-            params['o'] = self.oComboBox.currentText().encode('utf-8')
+            params['o'] = self.oComboBox.currentText()
         data = ''
         try:
-            r = urllib.urlopen('http://api.gis-support.pl/lpis?' + urllib.urlencode(params))
+            r = urllib.request.urlopen('http://api.gis-support.pl/lpis?' + urllib.parse.urlencode(params))
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Nieprawidłowy klucz GIS Support',
-                    level=QgsMessageBar.CRITICAL)
+                    level=Qgis.Critical)
                 return False
-            data = json.loads(r.read())['data']
+            data = json.loads(r.read().decode())['data']
         except:
             data = 'app connection problem'
         if data:
@@ -158,16 +162,16 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z bazą',
-                    level=QgsMessageBar.CRITICAL)
+                    level=Qgis.Critical)
                 return False
             elif data == 'app connection problem':
                 self.iface.messageBar().pushMessage(
                     'Wyszukiwarka LPIS',
                     u'Problem połączenia z aplikacją',
-                    level=QgsMessageBar.CRITICAL)
+                    level=Qgis.Critical)
                 return False
             else:
-                if not QgsMapLayerRegistry.instance().mapLayersByName(
+                if not QgsProject.instance().mapLayersByName(
                         'Wyszukiwarka LPIS'):
                     vl = QgsVectorLayer("MultiPolygon?crs=EPSG:2180",
                                         "Wyszukiwarka LPIS",
@@ -189,8 +193,8 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                          QgsField("shape_leng", QVariant.String),
                          QgsField("shape_area", QVariant.String)])
                     vl.commitChanges()
-                    QgsMapLayerRegistry.instance().addMapLayer(vl)
-                vl = QgsMapLayerRegistry.instance().mapLayersByName(
+                    QgsProject.instance().addMapLayer(vl)
+                vl = QgsProject.instance().mapLayersByName(
                     'Wyszukiwarka LPIS')[0]
                 pr = vl.dataProvider()
                 for wkt in data:
@@ -204,37 +208,38 @@ class SearchLPISModule(QDialog, FORM_CLASS):
                         vl.crs(),
                         self.iface.
                         mapCanvas().
-                        mapRenderer().
-                        destinationCrs()).
+                        mapSettings().
+                        destinationCrs(),
+                        QgsProject.instance()).
                     transform(vl.extent()))
                 self.iface.mapCanvas().refresh()
                 notfound_parcels = []
                 for nr in params['n'].replace(" ","").split(','):
-                    if nr not in vl.uniqueValues(vl.fieldNameIndex('numer')):
+                    if nr not in vl.uniqueValues(vl.fields().indexFromName('numer')):
                         notfound_parcels.append(nr)
                 if notfound_parcels:
                     self.iface.messageBar().pushMessage(
                         'Wyszukiwarka LPIS',
                         u"Nie znaleziono działek o numerze: {}".format(','.join(notfound_parcels)),
-                        level=QgsMessageBar.INFO)
+                        level=Qgis.Info)
                 if len(data) > 1 and ',' not in params['n']:
                     self.iface.messageBar().pushMessage(
                         'Wyszukiwarka LPIS',
                         u'Istnieje więcej działek o podanym numerze',
-                        level=QgsMessageBar.INFO)
+                        level=Qgis.Info)
                 return True
         else:
             self.iface.messageBar().pushMessage(
                 'Wyszukiwarka LPIS',
                 u'Nie znaleziono działki',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
             return False
 
     def updateP(self):
         self.pComboBox.clear()
-        self.p = sorted(self.data
-                        [self.wComboBox.currentText()].keys(),
-                        cmp=locale.strcoll)
+        self.p = sorted(list(self.data
+                        [self.wComboBox.currentText()].keys()),
+                        key=cmp_to_key(locale.strcoll))
         self.pComboBox.addItems(self.p)
         QSettings().setValue('gissupport/search_lpis/w',
                              self.wComboBox.currentText())
@@ -245,7 +250,7 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             self.g = sorted(self.data
                             [self.wComboBox.currentText()]
                             [self.pComboBox.currentText()],
-                            cmp=locale.strcoll)
+                            key=cmp_to_key(locale.strcoll))
             self.gComboBox.addItems(self.g)
             QSettings().setValue('gissupport/search_lpis/p',
                                  self.pComboBox.currentText())
@@ -266,11 +271,11 @@ class SearchLPISModule(QDialog, FORM_CLASS):
             self.iface.messageBar().pushMessage(
                 'Wyszukiwarka LPIS',
                 u'Podaj numer działki',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         elif not self.keyLineEdit.text():
             self.iface.messageBar().pushMessage(
                 'Wyszukiwarka LPIS',
                 u'Podaj klucz GIS Support',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         elif self.findPlot():
             super(SearchLPISModule, self).accept()

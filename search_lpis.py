@@ -20,19 +20,22 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QMessageBox
+from __future__ import absolute_import
+from builtins import object
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtWidgets import QAction, QMessageBox
+from qgis.PyQt.QtGui import QIcon
 from qgis.gui import QgsMessageBar
 # Initialize Qt resources from file resources.py
-import resources
+from . import resources
 # Import the code for the dialog
-from search_lpis_module import SearchLPISModule
-from identify_lpis_module import IdentifyLPISModule
-from intersect_lpis_module import IntersectLPISModule
+from .search_lpis_module import SearchLPISModule
+from .identify_lpis_module import IdentifyLPISModule
+from .intersect_lpis_module import IntersectLPISModule
 import os.path
 
 
-class SearchLPIS:
+class SearchLPIS(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):

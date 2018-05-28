@@ -20,12 +20,14 @@ IdentifyLPIS
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QVariant
-from qgis.gui import QgsMapToolEmitPoint, QgsMessageBar
-from qgis.core import QgsGeometry, QgsPoint, QgsCoordinateTransform, \
-    QgsCoordinateReferenceSystem, QgsMapLayerRegistry, QgsVectorLayer, \
-    QgsField, QgsFeature
-import urllib
+from future import standard_library
+standard_library.install_aliases()
+from qgis.PyQt.QtCore import QSettings, QVariant
+from qgis.gui import QgsMapToolEmitPoint
+from qgis.core import QgsGeometry, QgsCoordinateTransform, \
+    QgsCoordinateReferenceSystem, QgsProject, QgsVectorLayer, \
+    QgsField, QgsFeature, Qgis
+import urllib.request, urllib.parse, urllib.error
 import json
 
 
@@ -43,25 +45,26 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
 
     def findPlot(self, point):
         trans = QgsCoordinateTransform(
-            self.canvas.mapRenderer().destinationCrs(),
-            QgsCoordinateReferenceSystem(2180))
-        point = QgsGeometry.fromPoint(point)
+            self.canvas.mapSettings().destinationCrs(),
+            QgsCoordinateReferenceSystem(2180),
+            QgsProject.instance())
+        point = QgsGeometry.fromPointXY(point)
         point.transform(trans)
         params = {
-            'wkt': point.exportToWkt(),
+            'wkt': point.asWkt(),
             'key': QSettings().value('gissupport/api/key')
         }
         data = ''
         try:
-            params = urllib.urlencode(params)
-            r = urllib.urlopen('http://api.gis-support.pl/identify?' + params)
+            params = urllib.parse.urlencode(params)
+            r = urllib.request.urlopen('http://api.gis-support.pl/identify?' + params)
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     u'Identyfikacja LPIS',
                     u'Nieprawidłowy klucz GIS Support',
-                    level=QgsMessageBar.CRITICAL)
+                    level=Qgis.Critical)
                 return
-            resp = json.loads(r.read())
+            resp = json.loads(r.read().decode())
             data = resp['data']
         except:
             data = 'app connection problem'
@@ -69,22 +72,22 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
             self.iface.messageBar().pushMessage(
                 u'Identyfikacja LPIS',
                 u'Nie istnieją działki o podanych współrzędnych',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         elif data == 'db connection problem':
             self.iface.messageBar().pushMessage(
                 u'Identyfikacja LPIS',
                 u'Problem połączenia z bazą',
-                level=QgsMessageBar.CRITICAL)
+                level=Qgis.Critical)
         elif data == 'app connection problem':
             self.iface.messageBar().pushMessage(
                 u'Identyfikacja LPIS',
                 u'Problem połączenia z aplikacją',
-                level=QgsMessageBar.CRITICAL)
+                level=Qgis.Critical)
         else:
             self.createOutputLayer(resp)
 
     def createOutputLayer(self, resp):
-        if not QgsMapLayerRegistry.instance().mapLayersByName(
+        if not QgsProject.instance().mapLayersByName(
                 'Identyfikacja LPIS'):
             vl = QgsVectorLayer("MultiPolygon?crs=EPSG:2180",
                                 "Identyfikacja LPIS",
@@ -106,8 +109,8 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
                  QgsField("shape_leng", QVariant.String),
                  QgsField("shape_area", QVariant.String)])
             vl.commitChanges()
-            QgsMapLayerRegistry.instance().addMapLayer(vl)
-        vl = QgsMapLayerRegistry.instance().mapLayersByName(
+            QgsProject.instance().addMapLayer(vl)
+        vl = QgsProject.instance().mapLayersByName(
             'Identyfikacja LPIS')[0]
         pr = vl.dataProvider()
         for wkt in resp['data']:
@@ -121,7 +124,7 @@ class IdentifyLPISModule(QgsMapToolEmitPoint):
         self.iface.messageBar().pushMessage(
                 'Identyfikacja LPIS',
                 u'Znaleziono działkę',
-                level=QgsMessageBar.INFO)
+                level=Qgis.Info)
 
     def toggleMapTool(self, state):
         if state:

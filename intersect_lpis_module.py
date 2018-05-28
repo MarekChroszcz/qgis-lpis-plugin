@@ -20,17 +20,18 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4 import uic
-from PyQt4.QtCore import QSettings, QVariant
-from PyQt4.QtGui import QDialog
+from future import standard_library
+standard_library.install_aliases()
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import QSettings, QVariant
+from qgis.PyQt.QtWidgets import QDialog
 import os.path
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import json
-import processing
-from qgis.core import QgsMapLayer, QgsMapLayerRegistry, QgsGeometry, \
+from qgis.core import QgsMapLayer, QgsProject, QgsGeometry, \
         QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsVectorLayer, \
-        QgsFeature, QgsField, QgsRasterLayer
-from qgis.gui import QgsMessageBar, QgsMapLayerComboBox
+        QgsFeature, QgsField, QgsRasterLayer, Qgis
+from qgis.gui import QgsMapLayerComboBox
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'intersect_lpis_module.ui'))
@@ -60,7 +61,7 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
         self.layerComboBox.setFocus()
 
     def addWMS(self):
-        if not QgsMapLayerRegistry.instance().mapLayersByName(
+        if not QgsProject.instance().mapLayersByName(
                 'Dzialki LPIS'):
             url = ("contextualWMSLegend=0&"
                    "crs=EPSG:2180&"
@@ -72,7 +73,7 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                    "url=http://mapy.geoportal.gov.pl"
                    "/wss/service/pub/guest/G2_GO_WMS/MapServer/WMSServer")
             layer = QgsRasterLayer(url, 'Dzialki LPIS', 'wms')
-            QgsMapLayerRegistry.instance().addMapLayer(layer)
+            QgsProject.instance().addMapLayer(layer)
         else:
             pass
 
@@ -81,7 +82,7 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                              self.keyLineEdit.text())
 
     def createOutputLayer(self, resp):
-        if not QgsMapLayerRegistry.instance().mapLayersByName(
+        if not QgsProject.instance().mapLayersByName(
                 'Przeciecia LPIS'):
             vl = QgsVectorLayer("MultiPolygon?crs=EPSG:2180",
                                 "Przeciecia LPIS",
@@ -103,12 +104,12 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                  QgsField("shape_leng", QVariant.String),
                  QgsField("shape_area", QVariant.String)])
             vl.commitChanges()
-            QgsMapLayerRegistry.instance().addMapLayer(vl)
+            QgsProject.instance().addMapLayer(vl)
         for wkt in resp['data']:
             feature = QgsFeature()
             feature.setGeometry(QgsGeometry.fromWkt(wkt[0]))
             feature.setAttributes([a for a in wkt[1:]])
-            vl = processing.getObject('Przeciecia LPIS')
+            vl = QgsProject.instance().mapLayersByName('Przeciecia LPIS')[0]
             pr = vl.dataProvider()
             pr.addFeatures([feature])
         vl.updateExtents()
@@ -117,8 +118,9 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                 vl.crs(),
                 self.iface.
                 mapCanvas().
-                mapRenderer().
-                destinationCrs()).
+                mapSettings().
+                destinationCrs(),
+                QgsProject.instance()).
             transform(vl.extent()))
         self.iface.mapCanvas().refresh()
         if resp['status'] == 'limited':
@@ -126,52 +128,53 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
                 'Przeciecia LPIS',
                 u'Wynik został ograniczony do %d działek \
                 ze względu na ograniczenia serwera' % len(resp['data']),
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         else:
             self.iface.messageBar().pushMessage(
                 'Przeciecia LPIS',
                 u'Liczba działek przeciętych \
                 przez warstwę: %d' % len(resp['data']),
-                level=QgsMessageBar.INFO)
+                level=Qgis.Info)
 
     def findPlots(self):
         vl = self.layerComboBox.currentLayer()
         trans = QgsCoordinateTransform(vl.crs(),
-                                       QgsCoordinateReferenceSystem(2180))
+                                       QgsCoordinateReferenceSystem(2180),
+                                       QgsProject.instance())
         if not self.selectCheckBox.isChecked():
             geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.getFeatures()])
             geom.transform(trans)
-            if geom.isGeosEmpty():
+            if geom.isEmpty():
                 self.iface.messageBar().pushMessage(
                     'Przeciecia LPIS',
                     u'Brak obiektów na warstwie',
-                    level=QgsMessageBar.WARNING)
+                    level=Qgis.Warning)
                 return False
         else:
             geom = QgsGeometry().unaryUnion([QgsGeometry(f.geometry()) for f in vl.selectedFeatures()])
             geom.transform(trans)
-            if geom.isGeosEmpty():
+            if geom.isEmpty():
                 self.iface.messageBar().pushMessage(
                     'Przeciecia LPIS',
                     u'Brak zaznaczonych obiektów',
-                    level=QgsMessageBar.WARNING)
+                    level=Qgis.Warning)
                 return False
         params = {
-            'wkt': geom.exportToWkt(),
-            'key': self.keyLineEdit.text().encode('utf-8').strip()
+            'wkt': geom.asWkt(),
+            'key': self.keyLineEdit.text().strip()
         }
         data = ''
         try:
-            r = urllib.urlopen(
+            r = urllib.request.urlopen(
                 'http://api.gis-support.pl/intersect?key=' + params['key'],
-                json.dumps(params))
+                json.dumps(params).encode('utf-8'))
             if r.getcode() == 403:
                 self.iface.messageBar().pushMessage(
                     u'Przecięcia LPIS',
                     u'Nieprawidłowy klucz GIS Support',
-                    level=QgsMessageBar.CRITICAL)
+                    level=Qgis.Critical)
                 return False
-            resp = json.loads(r.read())
+            resp = json.loads(r.read().decode())
             data = resp['data']
         except:
             data = 'app connection problem'
@@ -179,17 +182,17 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
             self.iface.messageBar().pushMessage(
                 u'Przecięcia LPIS',
                 u'Warstwa nie przecina żadnej działki',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         elif data == 'db connection problem':
             self.iface.messageBar().pushMessage(
                 u'Przecięcia LPIS',
                 u'Problem połączenia z bazą',
-                level=QgsMessageBar.CRITICAL)
+                level=Qgis.Critical)
         elif data == 'app connection problem':
             self.iface.messageBar().pushMessage(
                 u'Przecięcia LPIS',
                 u'Problem połączenia z aplikacją',
-                level=QgsMessageBar.CRITICAL)
+                level=Qgis.Critical)
         else:
             self.createOutputLayer(resp)
             return True
@@ -200,6 +203,6 @@ class IntersectLPISModule(QDialog, FORM_CLASS):
             self.iface.messageBar().pushMessage(
                 u'Przecięcia LPIS',
                 u'Podaj warstwę do przecięcia',
-                level=QgsMessageBar.WARNING)
+                level=Qgis.Warning)
         elif self.findPlots():
             super(IntersectLPISModule, self).accept()
